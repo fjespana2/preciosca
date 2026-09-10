@@ -1,0 +1,50 @@
+{
+  "fase": "ingest",
+  "cuando": "2026-09-10T16:28:54",
+  "pasos": {
+    "nicaragua_normaliza": "ok",
+    "db_ingest": "ok",
+    "export": "ok"
+  },
+  "ingest": {
+    "fecha_reporte": "2026-09-09",
+    "por_pais": {
+      "Guatemala": 119,
+      "Honduras": 46,
+      "Nicaragua": 112
+    },
+    "filas_nuevas": 277,
+    "filas_actualizadas": 0,
+    "total_db": 277,
+    "tc": {
+      "GTQ": 7.633975,
+      "HNL": 26.811824,
+      "NIO": 36.747556
+    },
+    "tc_fallback": false,
+    "errores": []
+  },
+  "resumen_db": {
+    "total": 277,
+    "por_pais": {
+      "Guatemala": 119,
+      "Honduras": 46,
+      "Nicaragua": 112
+    },
+    "rango_fechas": [
+      "2026-08-24",
+      "2026-09-09"
+    ],
+    "dias_distintos": 3,
+    "ultimas_corridas": [
+      {
+        "fecha_reporte": "2026-09-09",
+        "ejecutado_en": "2026-09-10T16:28:55",
+        "gt_filas": 119,
+        "hn_filas": 46,
+        "ni_filas": 112,
+        "tc_fallback": 0
+      }
+    ]
+  }
+}

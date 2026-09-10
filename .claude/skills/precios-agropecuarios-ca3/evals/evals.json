@@ -1,0 +1,23 @@
+{
+  "skill_name": "precios-agropecuarios-ca3",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Corré la recolección diaria de precios agropecuarios de Guatemala, Honduras y Nicaragua y alimentá la base de datos. Cuando termines, decime cuántas filas nuevas entró cada país y en qué fecha viene cada reporte.",
+      "expected_output": "Ejecuta run_daily.py fetch, transcribe las 5 imágenes de Nicaragua a staging/ni.json, corre run_daily.py ingest. La base precios_ca3.sqlite queda con ~110-280 filas del día, CSV regenerados, y un resumen con filas por país y fecha de cada reporte.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Ya tengo la base de precios corriendo hace unas semanas. Necesito la evolución del precio mayorista del frijol rojo en los tres países, en dólares por libra, y un comentario de qué país está más caro.",
+      "expected_output": "Consulta registros filtrando producto_norm LIKE '%frijol rojo%' y segmento='mayorista', usa precio_lb_usd para comparar, entrega una serie por fecha y país más una conclusión. Explica que HN puede no tener frijol si su PDF es solo de hortalizas.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "El reporte de Honduras de hoy cambió de formato y ya no me está agarrando los precios. Revisá qué pasó y arreglalo si podés.",
+      "expected_output": "Diagnostica extract_honduras.py contra el PDF actual (pdfplumber.extract_table), identifica si el PDF pasó a ser imagen o cambió la rejilla, consulta references/fuentes.md, y propone/aplica un arreglo (p.ej. parseo por posición o transcripción por visión).",
+      "files": []
+    }
+  ]
+}
