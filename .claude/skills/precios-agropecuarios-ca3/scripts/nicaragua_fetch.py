@@ -45,12 +45,24 @@ BLOQUES = {
     "frutas": ("mayorista", "frutas", "Mercado Mayoreo"),
 }
 
+# el sitio a veces nombra los archivos en singular (p.ej. "pecuario_de_octubre.png",
+# "fruta_de_octubre.png"); se mapean al bloque canónico de BLOQUES.
+ALIASES = {
+    "mayorista": "mayorista",
+    "minorista": "minorista",
+    "pecuarios": "pecuarios",
+    "pecuario": "pecuarios",
+    "hortalizas": "hortalizas",
+    "frutas": "frutas",
+    "fruta": "frutas",
+}
+
 
 def _bloque(nombre: str) -> str | None:
     n = common.normaliza_texto(nombre)
-    for k in BLOQUES:
+    for k in sorted(ALIASES, key=len, reverse=True):
         if k in n:
-            return k
+            return ALIASES[k]
     return None
 
 
@@ -69,7 +81,7 @@ def main() -> int:
             break
     fecha = common.fecha_es_a_iso(fecha_txt) or common.fecha_es_a_iso(r.text)
 
-    imgs = []
+    candidatos: dict[str, str] = {}  # bloque -> src, prefiere el que trae el día (dígitos)
     for img in body.find_all("img"):
         src = img.get("src") or ""
         if not re.search(r"\.(png|jpe?g)$", src, re.I):
@@ -77,6 +89,12 @@ def main() -> int:
         bloque = _bloque(src) or _bloque(img.get("alt") or "")
         if not bloque:
             continue
+        previo = candidatos.get(bloque)
+        if previo is None or (re.search(r"\d", src) and not re.search(r"\d", previo)):
+            candidatos[bloque] = src
+
+    imgs = []
+    for bloque, src in candidatos.items():
         full = urljoin(URL, src)
         destino = carpeta / "imagenes" / f"ni_{bloque}_{fecha or 'sf'}.png"
         ir = requests.get(full, timeout=60, headers={"User-Agent": "precios-ca3/1.0"})
