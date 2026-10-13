@@ -89,6 +89,17 @@
   `src`/`alt` de los `<img>` en el `articleBody`. Si Bolsagro empezara a publicar
   Excel/PDF, reescribir el fetch para bajarlo y el ingest para parsearlo
   (eliminando el paso de transcripción).
+- **Visto el 2026-10-13**: el sitio nombró los archivos de PECUARIOS y FRUTAS en
+  singular (`pecuario_...png`, `fruta_...png`) en vez de plural, y publicó un
+  `<img>` de MINORISTA duplicado (uno con el día en el nombre, otro sin fecha —
+  probablemente un enlace viejo cacheado). `nicaragua_fetch.py` ya normaliza el
+  singular/plural (`ALIASES`) y prefiere, por bloque, el `src` que trae un
+  dígito (el día). Además, ese día **no había ninguna imagen de MAYORISTA**: el
+  archivo nombrado `minorista_...png` contenía en realidad la tabla
+  "Precios de venta **al por mayor** de granos básicos" (el título visible en
+  la imagen, no el nombre del archivo, decide el bloque real). Claude debe
+  siempre confirmar el bloque leyendo el título dentro de la imagen y
+  corregirlo si no coincide con el nombre de archivo/plantilla.
 
 ## Tipo de cambio
 
