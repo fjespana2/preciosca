@@ -51,7 +51,7 @@ def _asegura_dependencias() -> None:
     import importlib.util as u
     faltan = [m for m, pip in (
         ("pdfplumber", "pdfplumber"), ("requests", "requests"),
-        ("bs4", "beautifulsoup4"), ("lxml", "lxml"),
+        ("bs4", "beautifulsoup4"), ("lxml", "lxml"), ("cffi", "cffi"),
     ) if u.find_spec(m) is None]
     if faltan:
         print(f"[run] instalando dependencias: {faltan}")
