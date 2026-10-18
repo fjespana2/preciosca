@@ -100,6 +100,10 @@
   la imagen, no el nombre del archivo, decide el bloque real). Claude debe
   siempre confirmar el bloque leyendo el título dentro de la imagen y
   corregirlo si no coincide con el nombre de archivo/plantilla.
+- **Visto el 2026-10-18**: el sitio nombró el archivo de HORTALIZAS con un typo
+  (`HORTALZIAS__...png`, falta la "I"), por lo que el match por substring
+  `"hortalizas"` no lo encontraba y la plantilla salía con solo 4 imágenes.
+  `nicaragua_fetch.py` ya mapea `"hortalzias"` → `hortalizas` en `ALIASES`.
 
 ## Tipo de cambio
 

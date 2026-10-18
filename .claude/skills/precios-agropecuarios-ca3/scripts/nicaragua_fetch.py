@@ -53,6 +53,7 @@ ALIASES = {
     "pecuarios": "pecuarios",
     "pecuario": "pecuarios",
     "hortalizas": "hortalizas",
+    "hortalzias": "hortalizas",  # el sitio publicó este typo el 2026-10-15
     "frutas": "frutas",
     "fruta": "frutas",
 }

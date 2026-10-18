@@ -1,0 +1,97 @@
+{
+  "fase": "ingest",
+  "cuando": "2026-10-18T13:17:25",
+  "pasos": {
+    "nicaragua_normaliza": "ok",
+    "db_ingest": "ok",
+    "export": "ok"
+  },
+  "ingest": {
+    "fecha_corrida": "2026-10-18",
+    "fechas_por_fuente": {
+      "Guatemala": "2026-10-16",
+      "Honduras": "2026-08-24",
+      "Nicaragua": "2026-10-15"
+    },
+    "por_pais": {
+      "Guatemala": 122,
+      "Honduras": 46,
+      "Nicaragua": 112
+    },
+    "filas_nuevas_por_pais": {
+      "Guatemala": 0,
+      "Honduras": 0,
+      "Nicaragua": 33
+    },
+    "filas_actualizadas_por_pais": {
+      "Guatemala": 122,
+      "Honduras": 46,
+      "Nicaragua": 79
+    },
+    "filas_nuevas": 33,
+    "filas_actualizadas": 247,
+    "total_db": 3829,
+    "tc": {
+      "GTQ": 7.641331,
+      "HNL": 26.872312,
+      "NIO": 36.809852
+    },
+    "tc_fallback": false,
+    "errores": []
+  },
+  "resumen_db": {
+    "total": 3829,
+    "por_pais": {
+      "Guatemala": 2803,
+      "Honduras": 46,
+      "Nicaragua": 980
+    },
+    "rango_fechas": [
+      "2026-08-24",
+      "2026-10-16"
+    ],
+    "dias_distintos": 24,
+    "ultimas_corridas": [
+      {
+        "fecha_reporte": "2026-10-18",
+        "ejecutado_en": "2026-10-18T13:17:26",
+        "gt_filas": 122,
+        "hn_filas": 46,
+        "ni_filas": 112,
+        "tc_fallback": 0
+      },
+      {
+        "fecha_reporte": "2026-10-17",
+        "ejecutado_en": "2026-10-17T13:15:51",
+        "gt_filas": 122,
+        "hn_filas": 46,
+        "ni_filas": 79,
+        "tc_fallback": 0
+      },
+      {
+        "fecha_reporte": "2026-10-16",
+        "ejecutado_en": "2026-10-16T13:22:34",
+        "gt_filas": 145,
+        "hn_filas": 46,
+        "ni_filas": 79,
+        "tc_fallback": 0
+      },
+      {
+        "fecha_reporte": "2026-10-15",
+        "ejecutado_en": "2026-10-15T13:17:08",
+        "gt_filas": 176,
+        "hn_filas": 46,
+        "ni_filas": 112,
+        "tc_fallback": 0
+      },
+      {
+        "fecha_reporte": "2026-10-14",
+        "ejecutado_en": "2026-10-14T13:19:35",
+        "gt_filas": 145,
+        "hn_filas": 46,
+        "ni_filas": 112,
+        "tc_fallback": 0
+      }
+    ]
+  }
+}
