@@ -2,7 +2,7 @@
 name: precios-agropecuarios-ca3
 description: >-
   Recolecta y acumula los precios diarios de productos agropecuarios de los
-  reportes oficiales de Guatemala (MAGA), Honduras (SIMPAH/FHIA) y Nicaragua
+  reportes oficiales de Guatemala (MAGA), Honduras (SIMPAH/SAG) y Nicaragua
   (Bolsagro) en una base de datos SQLite + CSV, con variables listas para análisis
   estadístico (precio representativo, precio por libra, conversión a USD,
   categoría, mercado, origen, segmento mayorista/minorista). Úsala siempre que el
@@ -30,7 +30,7 @@ construye corriendo esto **todos los días**.
 | País | Fuente | Formato | Cómo se extrae |
 |---|---|---|---|
 | 🇬🇹 Guatemala | MAGA – Precios diarios al mayorista | Tabla HTML | `requests` + BeautifulSoup (determinista) |
-| 🇭🇳 Honduras | SIMPAH (SAG) vía FHIA – Reporte diario mayorista | PDF de texto | `pdfplumber.extract_table` (determinista) |
+| 🇭🇳 Honduras | SIMPAH (SAG) – hortalizas, frutas y granos (SPS y Tegucigalpa) | PDF de texto | `pdfplumber.extract_table` (determinista) |
 | 🇳🇮 Nicaragua | Bolsagro – Precios nacionales | **5 imágenes PNG** | Claude transcribe las tablas con visión, un script valida |
 
 Guatemala y Honduras se procesan solos. **Nicaragua exige que Claude lea las

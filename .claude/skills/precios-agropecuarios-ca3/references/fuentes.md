@@ -24,21 +24,26 @@
   navegador). Reportes relacionados del mismo sitio: semanales en
   `https://precios.maga.gob.gt/` (no los usa esta skill).
 
-## 🇭🇳 Honduras — SIMPAH (vía FHIA)
+## 🇭🇳 Honduras — SIMPAH (SAG)
 
-- **URL**: https://fhia.org.hn/wp-content/uploads/2.1._reporte_diario_precios_hortalizas_central_abastos.pdf
-- **Qué es**: SIMPAH (Sistema de Información de Mercados de Productos Agrícolas de
-  Honduras), Secretaría de Agricultura y Ganadería. FHIA lo re-publica.
-- **Formato**: PDF de **texto nativo**, 2 páginas, 1 tabla.
-  `pdfplumber.extract_table()` reconstruye celdas partidas en dos renglones
-  (`Bajos de\nCholoma`). `pdftotext -layout` también sirve para inspección.
-- **Columnas**: `Producto | Origen | Tamaño | Unidad de Venta | Rango Bajo |
-  Rango Alto | Moda Bajo | Moda Alto`. Cuando no hay moda, esas 2 celdas van
-  vacías y sólo queda el rango.
-- **Fecha**: encabezado `… Lunes, 24 de agosto del 2026`. `Código reporte:
+- **Página**: https://sag.gob.hn/secciones/publicaciones/simpah/
+- **Listado (API WordPress)**: `https://sag.gob.hn/wp-json/wp/v2/media?mime_type=application/pdf&after=AAAA-MM-DDT00:00:00&per_page=100`
+- **Historia**: hasta el 24-ago-2026 se leía la copia de FHIA
+  (`fhia.org.hn/.../2.1._reporte_diario_precios_hortalizas_central_abastos.pdf`).
+  FHIA dejó de actualizarla; desde sep-2026 la SAG publica directo. No usar FHIA.
+- **Nombre de archivo**: `<MERCADO>_<TIPO>_<AAAAMMDD>[-_]<No>.pdf`
+  - MERCADO: `SPSCA` Central de Abastos de Sula (SPS), `SPSMC` Medina-Concepción (SPS),
+    `TGAZB` Zonal Belén (Tegucigalpa)
+  - TIPO: `HOR` hortalizas, `FRU` frutas, `GB` granos básicos mayorista,
+    `GBMN` granos básicos minorista (se ignoran PEC, INS y otros)
+- **Recuperación automática**: cada corrida baja todos los reportes con fecha
+  posterior a la última de Honduras en la base (máx. 60 días). No hay que hacer
+  nada si una corrida falla o cae en fin de semana.
+- **Formato**: PDF de texto nativo. Columnas HOR/FRU: `Producto | Origen | Tamaño |
+  Unidad | Rango bajo | Rango alto | Moda bajo | Moda alto`. GB/GBMN no traen Tamaño.
+  Si sólo hay 2 números es precio único (min = max = moda).
+- **Fecha**: encabezado `… Viernes, 23 de octubre de 2026`; `Código reporte:
   SPSCA_HOR, No. NNN` → `reporte_id`.
-- **Mercado**: "Mercado Central de Abastos de Sula", San Pedro Sula. Este archivo
-  concreto (`2.1._…hortalizas…`) es **de hortalizas**.
 - **Moneda**: HNL. El pie del PDF trae `1 USD = 26.8476 HNL, fuente: Banco Central
   de Honduras` → se guarda como `tc_usd_hnl_pdf` y se usa de respaldo si la API de
   tipo de cambio falla.
@@ -47,10 +52,6 @@
     `hash` incluye la fecha, así que re-descargar el mismo PDF no duplica.
   - `Carga = 200 lb` (validado en reportes SIMPAH). Está en el mapa de unidades.
   - `origen` a veces es `lugar no especificado` o un país (`China`, `Holanda`).
-- **Otros reportes SIMPAH** (mismo patrón de nombre, por si se quieren agregar):
-  `2.2._…`, `2.3._…` suelen ser otros mercados/segmentos en el mismo directorio
-  `fhia.org.hn/wp-content/uploads/`. Para agregarlos, duplicar el extractor con la
-  URL y el `mercado` correctos.
 - **Si cambia**: si `extract_honduras.py` da 0 registros, el PDF pasó a ser
   escaneado (imagen) → habría que OCR (no hay tesseract; usar visión de Claude
   como en Nicaragua) o `extract_tables` ya no reconoce la rejilla → revisar

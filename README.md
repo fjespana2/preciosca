@@ -5,7 +5,7 @@ Recolección diaria de precios de productos agropecuarios de:
 | País | Fuente | Reporte |
 |---|---|---|
 | 🇬🇹 Guatemala | MAGA | Precios diarios al mayorista (HTML) |
-| 🇭🇳 Honduras | SIMPAH / FHIA | Reporte diario mayorista (PDF) |
+| 🇭🇳 Honduras | SIMPAH (SAG) — sag.gob.hn | Reportes diarios de hortalizas, frutas y granos básicos (PDF, SPS y Tegucigalpa) |
 | 🇳🇮 Nicaragua | Bolsagro | Precios nacionales (imágenes PNG) |
 
 ## Estructura
