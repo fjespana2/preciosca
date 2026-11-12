@@ -14,9 +14,9 @@ tiempo, promedios por categoría, comparaciones entre países y modelos.
 | `fuente` | texto | `MAGA` \| `SIMPAH` \| `Bolsagro` | `SIMPAH` |
 | `mercado` | texto | Mercado físico de referencia | `Mercado Central de Abastos de Sula` |
 | `ciudad` | texto | Ciudad del mercado | `San Pedro Sula` |
-| `segmento` | texto | `mayorista` \| `minorista` | `mayorista` |
-| `categoria` | texto | `granos` `hortalizas` `frutas` `carnes` `lacteos` `huevos` `pesca` `abarrotes` `otros` (clasificador por nombre) | `hortalizas` |
-| `subcategoria` | texto | Sólo Nicaragua/pecuarios: encabezado de la imagen | `Mariscos` |
+| `segmento` | texto | `mayorista` \| `minorista` \| `insumos` (sólo Honduras INS) | `mayorista` |
+| `categoria` | texto | `granos` `hortalizas` `frutas` `carnes` `lacteos` `huevos` `pesca` `abarrotes` `otros` (clasificador por nombre) · `insumos` (Honduras INS) | `hortalizas` |
+| `subcategoria` | texto | Nicaragua/pecuarios: encabezado de la imagen · Honduras INS: sección (`Fertilizantes`, `Insecticidas`, `Fungicidas`, `Herbicidas`) | `Mariscos` |
 | `producto` | texto | Nombre **tal cual** la fuente, sin recortar | `Tomate pera pintón` |
 | `producto_norm` | texto | `producto` en minúsculas, sin tildes, para joins entre países | `tomate pera pinton` |
 | `variedad` | texto | Reservado (hoy casi siempre NULL; la variedad va en `producto`) | |

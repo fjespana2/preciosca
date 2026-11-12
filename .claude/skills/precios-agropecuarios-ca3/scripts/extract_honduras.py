@@ -53,16 +53,37 @@ TIPOS = {  # tipo -> (pista categoría, segmento, trae columna tamaño)
     "FRU": ("frutas", "mayorista", True),
     "GB": ("granos basicos", "mayorista", False),
     "GBMN": ("granos basicos", "minorista", False),
+    # insumos agrícolas (reporte semanal, 2 columnas de texto: Producto | Unidad; secciones
+    # Fertilizantes / Insecticidas / Fungicidas / Herbicidas -> subcategoria). segmento "insumos".
+    "INS": ("insumos", "insumos", False),
 }
 MERCADOS = {
     "SPSCA": ("Mercado Central de Abastos de Sula", "San Pedro Sula"),
     "SPSMC": ("Mercado Medina-Concepción", "San Pedro Sula"),
     "TGAZB": ("Mercado Zonal Belén", "Tegucigalpa"),
+    "SPSAL": ("Avenida Lempira", "San Pedro Sula"),  # sólo reporta insumos
 }
-_PATRON = re.compile(r"/([A-Z]+)_([A-Z]+)_(\d{8})[-_]?(\d+)?\.pdf$", re.I)
+# Algunos archivos de la SAG llevan guion en vez de guion bajo ('TGAZB-FRU_…', 'SPS-_FRU_…').
+# 'SPS-_FRU' es el Central de Abastos de Sula (su encabezado dice SPSCA_FRU).
+ALIAS_MERCADO = {"SPS": "SPSCA"}
+_PATRON = re.compile(r"/([A-Z]+)[-_]+([A-Z]+)_(\d{8})[-_]?(\d+)?\.pdf$", re.I)
+VENTANA_DIAS = 14  # reportes que la SAG sube tarde: se revisan los últimos N días
 
 
 # ---------------------------------------------------------------- descarga
+def _ids_en_db() -> set[str]:
+    """reporte_id ya guardados ('SPSCA_HOR No.181'): esos PDF no se vuelven a bajar."""
+    db = common.carpeta_datos() / "precios_ca3.sqlite"
+    if not db.exists():
+        return set()
+    try:
+        con = sqlite3.connect(db)
+        return {r[0] for r in con.execute(
+            "SELECT DISTINCT reporte_id FROM registros WHERE pais=? AND reporte_id IS NOT NULL", (PAIS,))}
+    except sqlite3.Error:
+        return set()
+
+
 def _ultima_fecha_db() -> date | None:
     db = common.carpeta_datos() / "precios_ca3.sqlite"
     if not db.exists():
@@ -75,8 +96,8 @@ def _ultima_fecha_db() -> date | None:
         return None
 
 
-def lista_reportes(desde: date) -> list[dict]:
-    """Reportes SIMPAH publicados desde `desde` (fecha del reporte, no de subida)."""
+def lista_reportes(desde: date, conocidos: set[str] | frozenset = frozenset()) -> list[dict]:
+    """Reportes SIMPAH con fecha de reporte >= `desde`, sin los ya ingresados (`conocidos`)."""
     out, pagina = {}, 1
     after = (desde - timedelta(days=3)).isoformat() + "T00:00:00"
     while True:
@@ -92,13 +113,15 @@ def lista_reportes(desde: date) -> list[dict]:
             m = _PATRON.search(url)
             if not m:
                 continue
-            merc, tipo, ymd, _ = m.groups()
-            merc, tipo = merc.upper(), tipo.upper()
+            merc, tipo, ymd, num = m.groups()
+            merc, tipo = ALIAS_MERCADO.get(merc.upper(), merc.upper()), tipo.upper()
             if tipo not in TIPOS or merc not in MERCADOS:
                 continue
             f = date(int(ymd[:4]), int(ymd[4:6]), int(ymd[6:]))
+            if num and f"{merc}_{tipo} No.{int(num)}" in conocidos:
+                continue
             if f >= desde:
-                out[(merc, tipo, f)] = {"url": url, "mercado": merc, "tipo": tipo, "fecha": f}
+                out.setdefault((merc, tipo, f), {"url": url, "mercado": merc, "tipo": tipo, "fecha": f})
         if len(items) < 100:
             break
         pagina += 1
@@ -156,6 +179,8 @@ def extrae(pdf_path: Path, url: str | None = None) -> dict:
         texto = "\n".join((pg.extract_text() or "") for pg in pdf.pages)
         meta = _meta(texto, pdf_path.name if not url else url)
         pista, segmento, con_tamano = TIPOS.get(meta["tipo"], ("hortalizas", "mayorista", True))
+        es_ins = meta["tipo"] == "INS"
+        seccion = None  # encabezado de sección de insumos (Fertilizantes, Herbicidas…)
         for page in pdf.pages:
             for tabla in page.extract_tables() or []:
                 for row in tabla:
@@ -163,13 +188,21 @@ def extrae(pdf_path: Path, url: str | None = None) -> dict:
                     if not any(celdas) or common.normaliza_texto(celdas[0]) in _ENC:
                         continue
                     nums = [common.parse_numero(c) for c in celdas if _es_num(c)]
+                    if es_ins and not nums:
+                        # renglón de sección: texto corto en la 1.ª celda y el resto vacío
+                        if celdas[0] and len(celdas[0]) <= 40 and not any(celdas[1:]):
+                            seccion = celdas[0]
+                        continue
                     # columnas de texto = todo lo anterior a la primera celda numérica
                     k = next((i for i, c in enumerate(celdas)
                               if _es_num(c)), len(celdas))
                     txt = celdas[:k] + [""] * 4
                     if not nums or not txt[0]:
                         continue
-                    if con_tamano:
+                    if es_ins:
+                        producto, unidad = txt[:2]
+                        origen = tamano = None
+                    elif con_tamano:
                         producto, origen, tamano, unidad = txt[:4]
                     else:
                         producto, origen, unidad = txt[:3]
@@ -184,13 +217,15 @@ def extrae(pdf_path: Path, url: str | None = None) -> dict:
                     regs.append(common.construye_registro(
                         pais=PAIS, fecha=meta["fecha"], fuente=FUENTE,
                         mercado=meta["mercado"], ciudad=meta["ciudad"], segmento=segmento,
-                        categoria=pista, producto=producto, calidad=cm.group(1) if cm else None,
+                        categoria=pista, subcategoria=seccion if es_ins else None,
+                        producto=producto, calidad=cm.group(1) if cm else None,
                         tamano=tamano or None, origen=origen or None, unidad_venta=unidad or None,
                         moneda=MONEDA, precio_min=pmin, precio_max=pmax, precio_moda=pmoda,
                         url_fuente=url or PAGINA, reporte_id=meta["reporte_id"],
                         _pista_categoria=pista))
-    for r in regs:
-        r["categoria"] = common.clasifica_categoria(r["producto"], pista)
+    if pista != "insumos":  # los insumos conservan categoria='insumos'
+        for r in regs:
+            r["categoria"] = common.clasifica_categoria(r["producto"], pista)
     return {**meta, "n": len(regs), "registros": regs}
 
 
@@ -198,7 +233,8 @@ def extrae(pdf_path: Path, url: str | None = None) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--pdf", nargs="+", help="PDFs locales (pruebas)")
-    ap.add_argument("--desde", help="AAAA-MM-DD (por defecto: día siguiente a lo último en la base)")
+    ap.add_argument("--desde", help=f"AAAA-MM-DD (por defecto: últimos {VENTANA_DIAS} días; se omiten los reportes ya en la base)")
+    ap.add_argument("--reprocesa", action="store_true", help="vuelve a bajar también los reportes ya ingresados")
     ap.add_argument("--out", help="ruta de salida .json")
     args = ap.parse_args()
 
@@ -215,10 +251,11 @@ def main() -> int:
         if args.desde:
             desde = date.fromisoformat(args.desde)
         else:
-            ult = _ultima_fecha_db()
-            desde = (ult + timedelta(days=1)) if ult else hoy - timedelta(days=7)
-        desde = max(desde, hoy - timedelta(days=60))
-        lista = lista_reportes(desde)
+            # ventana móvil: un reporte semanal (insumos) o uno subido tarde no se pierde
+            desde = hoy - timedelta(days=VENTANA_DIAS) if _ultima_fecha_db() else hoy - timedelta(days=60)
+        desde = max(desde, hoy - timedelta(days=120))
+        conocidos = frozenset() if args.reprocesa else _ids_en_db()
+        lista = lista_reportes(desde, conocidos)
         print(f"[HN] {len(lista)} reportes SIMPAH desde {desde}")
         for it in lista:
             dest = staging / f"hn_{Path(it['url']).name}"

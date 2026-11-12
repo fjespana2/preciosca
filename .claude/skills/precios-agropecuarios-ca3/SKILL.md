@@ -30,7 +30,7 @@ construye corriendo esto **todos los días**.
 | País | Fuente | Formato | Cómo se extrae |
 |---|---|---|---|
 | 🇬🇹 Guatemala | MAGA – Precios diarios al mayorista | Tabla HTML | `requests` + BeautifulSoup (determinista) |
-| 🇭🇳 Honduras | SIMPAH (SAG) – hortalizas, frutas y granos (SPS y Tegucigalpa) | PDF de texto | `pdfplumber.extract_table` (determinista) |
+| 🇭🇳 Honduras | SIMPAH (SAG) – hortalizas, frutas, granos e **insumos** (SPS y Tegucigalpa) | PDF de texto | `pdfplumber.extract_table` (determinista) |
 | 🇳🇮 Nicaragua | Bolsagro – Precios nacionales | **5 imágenes PNG** | Claude transcribe las tablas con visión, un script valida |
 
 Guatemala y Honduras se procesan solos. **Nicaragua exige que Claude lea las

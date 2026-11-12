@@ -33,12 +33,26 @@
   FHIA dejó de actualizarla; desde sep-2026 la SAG publica directo. No usar FHIA.
 - **Nombre de archivo**: `<MERCADO>_<TIPO>_<AAAAMMDD>[-_]<No>.pdf`
   - MERCADO: `SPSCA` Central de Abastos de Sula (SPS), `SPSMC` Medina-Concepción (SPS),
-    `TGAZB` Zonal Belén (Tegucigalpa)
+    `SPSAL` Avenida Lempira (SPS, sólo insumos), `TGAZB` Zonal Belén (Tegucigalpa)
   - TIPO: `HOR` hortalizas, `FRU` frutas, `GB` granos básicos mayorista,
-    `GBMN` granos básicos minorista (se ignoran PEC, INS y otros)
-- **Recuperación automática**: cada corrida baja todos los reportes con fecha
-  posterior a la última de Honduras en la base (máx. 60 días). No hay que hacer
-  nada si una corrida falla o cae en fin de semana.
+    `GBMN` granos básicos minorista, `INS` insumos agrícolas (semanal, viernes).
+    Se ignoran `PEC` (pecuarios) y otros.
+  - **Nombres con guion** (corregido 2026-11-12): hay archivos `TGAZB-FRU_…` y
+    `SPS-_FRU_…` (guion en vez de guion bajo). El patrón acepta ambos; `SPS` se
+    trata como `SPSCA` (su encabezado dice `SPSCA_FRU`). Antes de la corrección se
+    perdían las frutas de Belén y algunas de Sula.
+- **Recuperación automática**: cada corrida revisa los últimos 14 días
+  (`VENTANA_DIAS`) y baja sólo los reportes cuyo `reporte_id` aún no está en la
+  base. Así no se pierde un reporte semanal (INS) ni uno que la SAG sube tarde, y
+  tampoco hay que hacer nada si una corrida falla o cae en fin de semana. Para
+  rellenar historia: `python extract_honduras.py --desde AAAA-MM-DD` (y luego
+  `db.py ingest`); `--reprocesa` vuelve a bajar también los ya ingresados.
+- **Insumos (INS)**: 2 columnas de texto (`Producto | Unidad de Venta`) + 4 de
+  precio, con renglones de sección (Fertilizantes, Insecticidas, Fungicidas,
+  Herbicidas) que se guardan en `subcategoria`. Se almacenan con
+  `segmento='insumos'` y `categoria='insumos'`. Los fertilizantes vienen por saco de
+  43 kg (→ 94.8 lb → `precio_lb_*`). Belén y San Pedro Sula tienen precios muy
+  distintos (urea 1,100 vs 820 L en oct-2026): **no mezclar mercados** al comparar.
 - **Formato**: PDF de texto nativo. Columnas HOR/FRU: `Producto | Origen | Tamaño |
   Unidad | Rango bajo | Rango alto | Moda bajo | Moda alto`. GB/GBMN no traen Tamaño.
   Si sólo hay 2 números es precio único (min = max = moda).
